@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>20141767</title>
+	<link rel="stylesheet" type="text/css" href="include/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Jua" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nova+Square" rel="stylesheet">
+</head>
+<body>
+	<!----------------------------------------------Header-->
+	<header>
+		<script src="include/header.js"></script>
+	</header>
+	<!------------------------------------------------Main-->
+	<section>
+		<?php
+			include "./include/header.php";
+			include "./include/connectDB.php";
+			$conn = db_connect();
+			$userNum = $_SESSION['userNum'];
+
+			$query = "SELECT * FROM user_has_address WHERE user_number = '$userNum'";
+			$result = mysqli_query($conn, $query);
+
+			echo '<a href="addressRegister.html">[배송지 등록]</a><br>';
+			echo '<a href="mypage.html">[뒤로가기]</a><br><br>';
+
+			echo "========== ";
+			echo $_SESSION['name'];
+			echo " 님의 배송지 목록 ==========<br>";
+
+			echo '<form action="addressDelete.php" method="POST" onsubmit="return check(this)">';
+			while($row = mysqli_fetch_array($result)){
+				echo '<input type="hidden" name="check_hidden[]" value="0">';
+				echo '<input type="checkbox" name="check_list[]">';
+				echo ' ';
+				$baseAddress = $row['address_base'];
+				$detailAddress = $row['address_detail'];
+				print_r('기본주소 : '.$baseAddress.' / ');
+				print_r('상세주소 : '.$detailAddress.' / ');
+				print_r('우편번호 : ');
+				$zipcodeQuery = "SELECT * FROM address WHERE base = '$baseAddress' AND detail = '$detailAddress'";
+				$zipcodeResult = mysqli_query($conn, $zipcodeQuery);
+				$zipcodeRow = mysqli_fetch_array($zipcodeResult);
+				print_r($zipcodeRow['zipcode']);
+				echo ' ';
+				echo '<br>';
+			}
+			echo '<input type="submit" value="삭제">';
+			echo '</form>';
+
+			mysqli_close($conn);
+		?>
+		<script type="text/javascript">
+			function check(form){
+				var check_length = form.elements['check_list[]'].length;
+				if(typeof(check_length) == 'undefined'){
+					if (form.elements['check_list[]'].checked == true){
+						form.elements['check_hidden[]'].value = 1;
+					}
+				}
+				for(i = 0; i < check_length; i++){
+					if (form.elements['check_list[]'][i].checked == true){
+						form.elements['check_hidden[]'][i].value = 1;
+					}
+				}
+			}
+		</script>
+	</section>
+	<!----------------------------------------------Footer-->
+	<footer>
+		<script src="include/footer.js"></script>
+	</footer>
+	<!--------------------------------------------20141767-->
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>20141767</title>
+	<link rel="stylesheet" type="text/css" href="include/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Jua" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nova+Square" rel="stylesheet">
+</head>
+<body>
+	<!----------------------------------------------Header-->
+	<header>
+		<script src="include/header.js"></script>
+	</header>
+	<!------------------------------------------------Main-->
+	<section>
+		<form method="POST" onsubmit="return check(this)">
+			<?php
+				include $_SERVER["DOCUMENT_ROOT"]."/include/header.php";
+				session_start();
+				$userNum = $_SESSION['userNum'];
+				include $_SERVER["DOCUMENT_ROOT"]."/include/connectDB.php";
+				$conn = db_connect();
+
+				$query = "SELECT * FROM basket WHERE user_number = '$userNum'";
+				$result = mysqli_query($conn, $query);
+				$row = mysqli_fetch_array($result);
+				$basket_number = $row['number'];
+
+				$query = "SELECT * FROM basket_has_book WHERE basket_number = '$basket_number'";
+				$result = mysqli_query($conn, $query);
+
+				echo '<a href="mypage.html">[뒤로가기]</a><br><br>';
+
+				echo "========== ";
+				echo $_SESSION['name'];
+				echo " 님의 장바구니 ==========<br>";
+
+				while($row = mysqli_fetch_array($result)){
+					$book_number = $row['book_number'];
+					$bookquery = "SELECT * FROM book WHERE number = '$book_number'";
+					$bookresult = mysqli_query($conn, $bookquery);
+					$bookrow = mysqli_fetch_array($bookresult);
+					echo '<div class="left"><input type="hidden" name="check_hidden[]" value="0">';
+					echo '<input type="checkbox" name="check_list[]">';
+					echo ' ';
+					print_r('책 : '.$bookrow['title']. ' / ');
+					print_r('재고 : '.$bookrow['stock'].' / ');
+					print_r('소계 : '.$row['price'].' ');
+					echo '</div><div class="right"><input type="text" name="count_list[]" placeholder="주문 개수입력"></div>';
+					echo '<br>';
+				}
+				mysqli_close($conn);
+				echo '<div class="left"><input type="submit" value="주문" formaction="order.html">';
+				echo '<input type="submit" value="삭제" formaction="basketBookDelete.php"></div>';
+			?>
+		</form>
+		<script type="text/javascript">
+			function check(form){
+				var check_length = form.elements['check_list[]'].length;
+				if(typeof(check_length) == 'undefined'){
+					if (form.elements['check_list[]'].checked == true){
+						form.elements['check_hidden[]'].value = 1;
+					}
+				}
+				for(i = 0; i < check_length; i++){
+					if (form.elements['check_list[]'][i].checked == true){
+						form.elements['check_hidden[]'][i].value = 1;
+					}
+				}
+			}
+		</script>
+	</section>
+	<!----------------------------------------------Footer-->
+	<footer>
+		<script src="include/footer.js"></script>
+	</footer>
+	<!--------------------------------------------20141767-->
+</body>
+</html>

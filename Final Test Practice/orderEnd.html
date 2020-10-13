@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>20141767</title>
+	<link rel="stylesheet" type="text/css" href="include/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Jua" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nova+Square" rel="stylesheet">
+</head>
+<body>
+	<!----------------------------------------------Header-->
+	<header>
+		<script src="include/header.js"></script>
+	</header>
+	<!------------------------------------------------Main-->
+	<section>
+		<?php
+			session_start();
+			$userNum = $_SESSION['userNum'];
+			include $_SERVER["DOCUMENT_ROOT"]."/include/connectDB.php";
+			include $_SERVER["DOCUMENT_ROOT"]."/include/header.php";
+			$conn = db_connect();
+			$cre_number = $_POST['credit'];
+			$address_index = $_POST['address_index'];
+			$book_number = $_POST['book_number'];
+			$book_count = $_POST['book_count'];
+			$book_total = $_POST['book_total'];
+			$value = 0;
+
+			for($index = 0; $index < count($book_total); $index++){
+					$total += $book_total[$index];
+			}
+
+			if($cre_number == null || $address_index == null){
+				echo "<script>alert('공백이 있습니다.');</script>";
+				echo "<script>history.back();</script>";
+				exit();
+			}
+
+			for($index = 0; $index < count($book_total); $index++){
+				$query = "SELECT * FROM book WHERE number = '$book_number[$index]'";
+				$result = mysqli_query($conn, $query);
+				$row = mysqli_fetch_array($result);
+				$stock = $row['stock'];
+				if($book_count[$index] > $stock){
+					echo '<a href="books.html">[다시고르기]</a><br><br>';
+					echo '========== 주문실패!! ==========<br>';
+					$value = 1;
+					break;
+				}
+			}
+
+			for($index = 0; $index < count($book_total); $index++){
+				$query = "SELECT * FROM book WHERE number = '$book_number[$index]'";
+				$result = mysqli_query($conn, $query);
+				$row = mysqli_fetch_array($result);
+				$stock = $row['stock'];
+				$title = $row['title'];
+				if($book_count[$index] > $stock){
+					$lack = $book_count[$index] - $stock;
+					echo '재고부족 : '.$title.' 책이 '.$lack.' 개 만큼 부족합니다.<br>';
+				};
+			}
+
+			
+			if($value == 0){
+				for($index = 0; $index < count($book_total); $index++){
+					$query = "SELECT * FROM book WHERE number = '$book_number[$index]'";
+					$result = mysqli_query($conn, $query);
+					$row = mysqli_fetch_array($result);
+					$stock = $row['stock'];
+					$finish = $stock - $book_count[$index];
+					mysqli_query($conn, "UPDATE book SET stock = '$finish' WHERE number = '$book_number[$index]'");
+				}
+
+				$query = "SELECT * FROM user_has_address WHERE user_number = '$userNum'";
+				$result = mysqli_query($conn, $query);
+				while($row = mysqli_fetch_array($result)){
+					$address_base[] = $row['address_base'];
+					$address_detail[] = $row['address_detail'];
+				}
+
+				$add_base = $address_base[$address_index];
+				$add_detail = $address_detail[$address_index];
+
+				$query = "SELECT * FROM address WHERE base = '$add_base' AND detail = '$add_detail'";
+				$result = mysqli_query($conn, $query);
+				while($row = mysqli_fetch_array($result)){
+					$add_zipcode = $row['zipcode'];
+				}
+
+				$query = "SELECT * FROM credit WHERE number = '$cre_number'";
+				$result = mysqli_query($conn, $query);
+				while($row = mysqli_fetch_array($result)){
+					$cre_date = $row['date'];
+					$cre_kind = $row['kind'];
+				}
+				$date = date("Y-m-d");
+
+				echo '<a href="books.html">[책보러가기]</a><br><br>';
+				
+				$query = "INSERT INTO orders (user_number, date, price, credit_number, credit_date, credit_kind, add_base, add_detail, add_zipcode) VALUES ('$userNum', '$date', '$total', '$cre_number', '$cre_date', '$cre_kind', '$add_base', '$add_detail', '$add_zipcode')";
+				$result = mysqli_query($conn, $query);
+				$lastid = mysqli_insert_id($conn);
+
+				echo '========== 주문완료!! ==========<br>';
+				echo '주문번호 : '.$lastid.'<br>';
+				echo '회원번호 : '.$userNum.'<br>';
+				echo '주문날짜 : '.$date.'<br>';
+				echo '주문가격 : '.$total.'<br><br>';
+				echo '카드번호 : '.$cre_number.'<br>';
+				echo '유효기간 : '.$cre_date.'<br>';
+				echo '카드종류 : '.$cre_kind.'<br><br>';
+				echo '기본주소 : '.$add_base.'<br>';
+				echo '상세주소 : '.$add_detail.'<br>';
+				echo '우편번호 : '.$add_zipcode.'<br>';
+
+				for($index = 0; $index < count($book_total); $index++){
+					mysqli_query($conn, "INSERT INTO order_has_book (order_number, book_number, price) VALUES ('$lastid', '$book_number[$index]', '$book_total[$index]')");
+				}
+				mysqli_close($conn);
+			}
+		?>
+	</section>
+	<!----------------------------------------------Footer-->
+	<footer>
+		<script src="include/footer.js"></script>
+	</footer>
+	<!--------------------------------------------20141767-->
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>20141767</title>
+	<link rel="stylesheet" type="text/css" href="include/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Jua" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nova+Square" rel="stylesheet">
+</head>
+<body>
+	<!----------------------------------------------Header-->
+	<header>
+		<script src="include/header.js"></script>
+	</header>
+	<!------------------------------------------------Main-->
+	<section>
+		<?php
+			include $_SERVER["DOCUMENT_ROOT"]."/include/header.php";
+
+			echo '<a href="bookHistory.html">[뒤로가기]</a><br><br>';
+
+			$index = $_POST['index'];
+			$number = $_POST['number'];
+			$user_number = $_POST['user_number'];
+			$date = $_POST['date'];
+			$price = $_POST['price'];
+			$credit_number = $_POST['credit_number'];
+			$credit_date = $_POST['credit_date'];
+			$credit_kind = $_POST['credit_kind'];
+			$add_base = $_POST['add_base'];
+			$add_detail = $_POST['add_detail'];
+			$add_zipcode = $_POST['add_zipcode'];
+
+			echo '========== 상세내역 ==========<br>';
+			echo '주문번호 : '.$number[$index].'<br>';
+			echo '회원번호 : '.$user_number[$index].'<br>';
+			echo '주문날짜 : '.$date[$index].'<br>';
+			echo '주문가격 : '.$price[$index].'<br><br>';
+			echo '카드번호 : '.$credit_number[$index].'<br>';
+			echo '유효기간 : '.$credit_date[$index].'<br>';
+			echo '카드종류 : '.$credit_kind[$index].'<br><br>';
+			echo '기본주소 : '.$add_base[$index].'<br>';
+			echo '상세주소 : '.$add_detail[$index].'<br>';
+			echo '우편번호 : '.$add_zipcode[$index].'<br>';
+		?>
+	</section>
+	<!----------------------------------------------Footer-->
+	<footer>
+		<script src="include/footer.js"></script>
+	</footer>
+	<!--------------------------------------------20141767-->
+</body>
+</html>

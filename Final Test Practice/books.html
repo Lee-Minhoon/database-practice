@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>20141767</title>
+	<link rel="stylesheet" type="text/css" href="include/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Jua" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nova+Square" rel="stylesheet">
+</head>
+<body>
+	<!----------------------------------------------Header-->
+	<header>
+		<script src="include/header.js"></script>
+	</header>
+	<!------------------------------------------------Main-->
+	<section>
+		<?php include $_SERVER["DOCUMENT_ROOT"]."/include/header.php"; ?>
+		<a href="bookRegister.html">[책등록]</a><br>
+		<a href="mypage.html">[마이페이지]</a><br>
+		<a href="index.php">[뒤로가기]</a><br>
+		<a href="logout.php">[로그아웃]</a>
+		<form method="POST">
+			<br>
+			<input type="text" name="title" style="width:500px" placeholder="아무것도 입력하지않으면 전체목록을 보여줍니다.">
+			<input type="submit" value="검색">
+		</form>
+		<?php
+			header("Cache-Control: no cache");
+			include $_SERVER["DOCUMENT_ROOT"]."/include/connectDB.php";
+			$conn = db_connect();
+			$title = $_POST['title'];
+
+			$query = "SELECT * FROM book WHERE title like '%".$title."%'";
+			$result = mysqli_query($conn, $query);
+
+			echo "<br>========== 도서 목록 ==========<br>";
+
+			echo '<form method="POST" onsubmit="return check(this)">';
+			while($row = mysqli_fetch_array($result)){
+				echo '<div class="left"><input type="hidden" name="check_hidden[]" value="0">';
+				echo '<input type="checkbox" name="check_list[]">';
+				echo ' ';
+				print_r('책제목 : '.$row['title'].' / ');
+				print_r('재고 : '.$row['stock'].' / ');
+				print_r('가격 : '.$row['price'].' ');
+				echo '</div><div class="right"><input type="text" name="count_list[]" placeholder="주문개수입력"></div>';
+				echo '<br>';
+			}
+			mysqli_close($conn);
+			echo '<div class="left"><input type="submit" value="주문" formaction="order.html">';
+			echo '<input type="submit" value="담기" formaction="basket.php"></div></form>';
+		?>
+		<script type="text/javascript">
+			function check(form){
+				var check_length = form.elements['check_list[]'].length;
+				if(typeof(check_length) == 'undefined'){
+					if (form.elements['check_list[]'].checked == true){
+						form.elements['check_hidden[]'].value = 1;
+					}
+				}
+				for(i = 0; i < check_length; i++){
+					if (form.elements['check_list[]'][i].checked == true){
+						form.elements['check_hidden[]'][i].value = 1;
+					}
+				}
+			}
+		</script>
+	</section>
+	<!----------------------------------------------Footer-->
+	<footer>
+		<script src="include/footer.js"></script>
+	</footer>
+	<!--------------------------------------------20141767-->
+</body>
+</html>

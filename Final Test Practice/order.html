@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>20141767</title>
+	<link rel="stylesheet" type="text/css" href="include/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Jua" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nova+Square" rel="stylesheet">
+</head>
+<body>
+	<!----------------------------------------------Header-->
+	<header>
+		<script src="include/header.js"></script>
+	</header>
+	<!------------------------------------------------Main-->
+	<section>
+		<form action="orderEnd.html" method="post">
+			<?php
+				session_cache_limiter("private_no_expire");
+				include $_SERVER["DOCUMENT_ROOT"]."/include/header.php";
+				include $_SERVER["DOCUMENT_ROOT"]."/include/connectDB.php";
+				$conn = db_connect();
+				$userNum = $_SESSION['userNum'];
+
+				echo '<a href="books.html">[뒤로가기]</a><br><br>';
+
+				$query = "SELECT * FROM credit WHERE user_number = '$userNum'";
+				$query2 = "SELECT * FROM user_has_address WHERE user_number = '$userNum'";
+				$result = mysqli_query($conn, $query);
+				$result2 = mysqli_query($conn, $query2);
+				$total_rows = mysqli_num_rows($result);
+				$total_rows2 = mysqli_num_rows($result2);
+			?>
+			<select name="credit">
+				<?php
+					while($row = mysqli_fetch_array($result)){
+						$card[] = $row['number'];
+					}
+					
+					echo '<option value="">카드선택</option>';
+					for($index = 0; $index < $total_rows; $index++){
+						echo "<option value='$card[$index]'>$card[$index]</option>";
+					}
+				?>
+			</select>
+			<select name="address_index">
+				<?php
+					while($row2 = mysqli_fetch_array($result2)){
+						$address[] = $row2['address_detail'];
+					}
+					
+					echo '<option value="">배송지선택</option>';
+					for($index = 0; $index < $total_rows2; $index++){
+						echo "<option value='$index'>$address[$index]</option>";
+					}
+				?>
+			</select>
+			<input type="submit" value="주문하기">
+			<?php
+				$title = [];
+				$price = [];
+				$book_number = [];
+				$count = $_POST['count_list'];
+
+				$query = "SELECT * FROM book";
+				$result = mysqli_query($conn, $query);
+				while($row = mysqli_fetch_array($result)){
+					$title[] = $row['title'];
+					$price[] = $row['price'];
+					$number[] = $row['number'];
+				}
+				echo '<br><br>========== 주문할 책 목록 ==========<br>';
+				for($index = 0; $index < count($price); $index++){
+					if($count[$index] > 0){
+						echo '책제목 : '.$title[$index].' / ';
+						echo '가격 : '.$price[$index].' / ';
+						echo '수량 : '.$count[$index].' / ';
+						$total = $price[$index] * $count[$index];
+						$all_total += $total;
+						echo '합계 : '.$total;
+						echo "<br>";
+						echo '<input type="hidden" name="book_number[]" value="'.$number[$index].'">';
+						echo '<input type="hidden" name="book_count[]" value="'.$count[$index].'">';
+						echo '<input type="hidden" name="book_total[]" value="'.$total.'">';
+					}
+				}
+				echo '총합계 : '.$all_total;
+				if($all_total == 0) echo "<script>if(!alert('고른 책이 없습니다.')) document.location = '/books.html'</script>";
+				mysqli_close($conn);
+			?>
+		</form>
+	</section>
+	<!----------------------------------------------Footer-->
+	<footer>
+		<script src="include/footer.js"></script>
+	</footer>
+	<!--------------------------------------------20141767-->
+</body>
+</html>

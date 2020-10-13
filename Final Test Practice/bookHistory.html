@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>20141767</title>
+	<link rel="stylesheet" type="text/css" href="include/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Jua" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nova+Square" rel="stylesheet">
+</head>
+<body>
+	<!----------------------------------------------Header-->
+	<header>
+		<script src="include/header.js"></script>
+	</header>
+	<!------------------------------------------------Main-->
+	<section>
+		<?php
+			include $_SERVER["DOCUMENT_ROOT"]."/include/header.php";
+			session_start();
+			$userNum = $_SESSION['userNum'];
+			include $_SERVER["DOCUMENT_ROOT"]."/include/connectDB.php";
+			$conn = db_connect();
+			$value = 0;
+
+			$query = "SELECT * FROM orders WHERE user_number like '$userNum'";
+			$result = mysqli_query($conn, $query);
+
+			echo '<a href="mypage.html">[뒤로가기]</a><br><br>';
+
+			echo "========== ";
+			echo $_SESSION['name'];
+			echo " 님의 주문내역 ==========<br>";
+
+			echo '<form method="POST" onsubmit="return check(this)">';
+			while($row = mysqli_fetch_array($result)){
+				echo '<div class="left"><input type="hidden" name="check_hidden[]" value="0">';
+				echo '<input type="checkbox" name="check_list[]">';
+				echo ' ';
+				print_r('주문날짜 : '.$row['date'].' / ');
+				print_r('주문가격 : '.$row['price'].' ');
+				echo '</div><input type="hidden" name="number[]" value="'.$row['number'].'">';
+				echo '<input type="hidden" name="user_number[]" value="'.$row[user_number].'">';
+				echo '<input type="hidden" name="date[]" value="'.$row[date].'">';
+				echo '<input type="hidden" name="price[]" value="'.$row[price].'">';
+				echo '<input type="hidden" name="credit_number[]" value="'.$row[credit_number].'">';
+				echo '<input type="hidden" name="credit_date[]" value="'.$row[credit_date].'">';
+				echo '<input type="hidden" name="credit_kind[]" value="'.$row[credit_kind].'">';
+				echo '<input type="hidden" name="add_base[]" value="'.$row[add_base].'">';
+				echo '<input type="hidden" name="add_detail[]" value="'.$row[add_detail].'">';
+				echo '<input type="hidden" name="add_zipcode[]" value="'.$row[add_zipcode].'">';
+				echo '<button type="submit" name="index" value="'.$value.'" formaction="detail.html">상세보기</button>';
+				echo '<br>';
+				$value ++;
+			}
+			echo '<input type="submit" value="삭제" formaction="HistoryDelete.php">';
+			echo '</form>';
+			mysqli_close($conn);
+		?>
+		<script type="text/javascript">
+			function check(form){
+				var check_length = form.elements['check_list[]'].length;
+				if(typeof(check_length) == 'undefined'){
+					if (form.elements['check_list[]'].checked == true){
+						form.elements['check_hidden[]'].value = 1;
+					}
+				}
+				for(i = 0; i < check_length; i++){
+					if (form.elements['check_list[]'][i].checked == true){
+						form.elements['check_hidden[]'][i].value = 1;
+					}
+				}
+			}
+		</script>
+	</section>
+	<!----------------------------------------------Footer-->
+	<footer>
+		<script src="include/footer.js"></script>
+	</footer>
+	<!--------------------------------------------20141767-->
+</body>
+</html>
